@@ -63,9 +63,29 @@ The original README referenced external prompts:
 
 If your experiment depends on prompt-based MVTec datasets such as `mvtec_clsprompt`, make sure these prompt resources are prepared before training or evaluation.
 
-### 3. Optional preprocessing / residual feature generation
+### 3. REST residual preparation
 
-The original experiments also used preprocessing code under `REST/` and PCR generation commands. Those commands were highly environment-specific and used absolute local paths. Keep them as a reference only unless you have the same data layout.
+The original experiments used preprocessing code under `REST/` and PCR generation commands to prepare residual features. These commands are environment-specific and keep the original local paths for reference.
+
+```bash
+cd REST
+python dataset/prepocess.py
+
+cd PCA_win_global
+for item in 'grid' 'carpet' 'leather' 'tile' 'wood'; do
+  python get_PCR.py --dataset $item --patchcore-add-pos-embed True --pca-com 0.95 --min-global-nn 64 \
+    --global-nn-strategy min --local-layers layer1 layer2 layer3 --bank-name pca0.95_minglo64_pos0.03 \
+    --save-folder pca0.95_glo64s4pca16w4_pos0.03_l123_residual --target-embed-dimension 512 --pos-weight 0.03 \
+    --global-win 4 --global-pca 16 --global-resize_stride 4 --root-dir /home/Jingqi/AD/Data/defect_1024/mvtec
+done
+
+for item in 'bottle' 'cable' 'capsule' 'transistor' 'screw' 'hazelnut' 'pill' 'metal_nut' 'zipper' 'toothbrush'; do
+  python get_PCR.py --dataset $item --patchcore-add-pos-embed True --pca-com 0.95 --min-global-nn 64 \
+    --global-nn-strategy min --local-layers layer1 layer2 layer3 --bank-name pca0.95_minglo64_pos0.15 \
+    --save-folder pca0.95_glo64s4pca16w4_pos0.15_l123_residual --target-embed-dimension 512 --pos-weight 0.15 \
+    --global-win 4 --global-pca 16 --global-resize_stride 4 --root-dir /home/Jingqi/AD/Data/defect_1024/mvtec
+done
+```
 
 ## Training
 
@@ -90,39 +110,26 @@ Important arguments:
 - `--workers`: dataloader worker count.
 - `--weights`: optional pretrained checkpoint.
 
-### Example: iterative mask training on MVTec
+### Two-stage training
+
+Stage 1 trains the iterative-mask model. Stage 2 trains the image variant on top of that setup.
 
 ```bash
-WEIGHT=/path/to/cocolvis_vit_base.pth
-python train.py models/iter_mask/zero_conv_plainvit_base448_mvtec_itermask_clsprompt.py \
-  --batch-size 8 \
-  --gpus 0 \
-  --workers 8 \
-  --category bottle \
-  --weights "$WEIGHT"
-```
-
-### Example: category loop
-
-```bash
-for item in bottle cable capsule hazelnut metal_nut pill screw transistor toothbrush zipper; do
-  python train.py models/iter_mask/zero_conv_plainvit_base448_mvtec_itermask_clsprompt.py \
-    --batch-size 8 \
-    --gpus 0 \
-    --workers 8 \
-    --category "$item" \
-    --weights /path/to/cocolvis_vit_base.pth
+for item in carpet grid leather tile wood bottle cable capsule hazelnut metal_nut screw pill transistor toothbrush zipper; do
+  WEIGHT=/home/Jingqi/AD/pretrained/cocolvis_vit_base.pth
+  python train.py models/iter_mask/mvtec_clsprompt.py \
+    --batch-size=8 \
+    --gpus=0 --category $item --workers=8 
+    
+  python train.py models/image/zero_conv_plainvit_base448_mvtec_itermask_clsprompt.py \
+    --batch-size=8 \
+    --gpus=0 --category $item --workers=8 --weights $WEIGHT
   sleep 30
 done
 ```
 
 ## Evaluation
 
-The main evaluation entry point is:
-
-```bash
-python scripts/evaluate_model.py NoBRS --checkpoint <checkpoint> --datasets <dataset>
-```
 
 Important arguments:
 
