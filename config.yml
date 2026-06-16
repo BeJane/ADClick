@@ -1,0 +1,13 @@
+INTERACTIVE_MODELS_PATH: "./weights"
+EXPS_PATH: "model_posfar/no_ok"
+
+# Train datasets
+MVTEC_PATH: "/home/Jingqi/AD/Data/defect_1024/mvtec"
+BTAD_PATH: "/home/lenovo01/disk/adclick/data/defect_512/btad"
+KSDD2_PATH: "/home/lenovo01/disk/adclick/data/defect_512/"
+# You can download the weights for HRNet from the repository:
+# https://github.com/HRNet/HRNet-Image-Classification
+IMAGENET_PRETRAINED_MODELS:
+  SIMPLE_CLICK: "/home/Jingqi/AD/pretrained/cocolvis_vit_base.pth"
+  MAE_BASE: "/home/Jingqi/AD/pretrained/mae_pretrain_vit_base.pth"
+
