@@ -1,8 +1,8 @@
 # ADClick
 
-Official PyTorch implementation of [Towards Efficient Pixel Labeling for Industrial Anomaly Detection and Localization](https://arxiv.org/abs/2407.03130).
+Official PyTorch implementation of [Towards Efficient Pixel Labeling for Industrial Anomaly Detection and Localization](https://arxiv.org/abs/2407.03130). This repo is created by Jingqi Wu.
 
-Current paper status: **Pattern Recognition Letters (under review)**.
+**Accepted by Pattern Recognition Letters**.
 
 ## Overview
 
